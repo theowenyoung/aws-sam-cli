@@ -43,15 +43,16 @@ class ContainerManager:
         bool
             True, if Docker is available, False otherwise
         """
-        try:
-            self.docker_client.ping()
+        return True
+        # try:
+        #     self.docker_client.ping()
 
-            return True
+        #     return True
 
-        # When Docker is not installed, a request.exceptions.ConnectionError is thrown.
-        except (docker.errors.APIError, requests.exceptions.ConnectionError):
-            LOG.debug("Docker is not reachable", exc_info=True)
-            return False
+        # # When Docker is not installed, a request.exceptions.ConnectionError is thrown.
+        # except (docker.errors.APIError, requests.exceptions.ConnectionError):
+        #     LOG.debug("Docker is not reachable", exc_info=True)
+        #     return False
 
     def run(self, container, input_data=None, warm=False):
         """
@@ -64,35 +65,35 @@ class ContainerManager:
         :raises DockerImagePullFailedException: If the Docker image was not available in the server
         """
 
-        if warm:
-            raise ValueError("The facility to invoke warm container does not exist")
+        # if warm:
+        #     raise ValueError("The facility to invoke warm container does not exist")
 
-        image_name = container.image
+        # image_name = container.image
 
-        is_image_local = self.has_image(image_name)
+        # is_image_local = self.has_image(image_name)
 
-        # Skip Pulling a new image if: a) Image name is samcli/lambda OR b) Image is available AND
-        # c) We are asked to skip pulling the image
-        if (is_image_local and self.skip_pull_image) or image_name.startswith("samcli/lambda"):
-            LOG.info("Requested to skip pulling images ...\n")
-        else:
-            try:
-                self.pull_image(image_name)
-            except DockerImagePullFailedException:
-                if not is_image_local:
-                    raise DockerImagePullFailedException(
-                        "Could not find {} image locally and failed to pull it from docker.".format(image_name)
-                    )
+        # # Skip Pulling a new image if: a) Image name is samcli/lambda OR b) Image is available AND
+        # # c) We are asked to skip pulling the image
+        # if (is_image_local and self.skip_pull_image) or image_name.startswith("samcli/lambda"):
+        #     LOG.info("Requested to skip pulling images ...\n")
+        # else:
+        #     try:
+        #         self.pull_image(image_name)
+        #     except DockerImagePullFailedException:
+        #         if not is_image_local:
+        #             raise DockerImagePullFailedException(
+        #                 "Could not find {} image locally and failed to pull it from docker.".format(image_name)
+        #             )
 
-                LOG.info("Failed to download a new %s image. Invoking with the already downloaded image.", image_name)
+        #         LOG.info("Failed to download a new %s image. Invoking with the already downloaded image.", image_name)
 
-        if not container.is_created():
-            # Create the container first before running.
-            # Create the container in appropriate Docker network
-            container.network_id = self.docker_network_id
-            container.create()
+        # if not container.is_created():
+        #     # Create the container first before running.
+        #     # Create the container in appropriate Docker network
+        #     container.network_id = self.docker_network_id
+        #     container.create()
 
-        container.start(input_data=input_data)
+        # container.start(input_data=input_data)
 
     def stop(self, container):
         """
@@ -100,7 +101,7 @@ class ContainerManager:
 
         :param samcli.local.docker.container.Container container: Container to stop
         """
-        container.delete()
+        # container.delete()
 
     def pull_image(self, image_name, stream=None):
         """

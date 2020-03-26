@@ -1,7 +1,10 @@
 # Default value for environment variable. Can be overridden by setting the
 # environment variable.
 SAM_CLI_TELEMETRY ?= 0
-
+REPO := owenyoung/sam-without-docker
+TAG := $$(git log -1 --pretty=%H)
+IMG    := ${REPO}:${TAG}
+IMG_LATEST := ${SERVER_NAME}:latest
 init:
 	SAM_CLI_DEV=1 pip install -e '.[dev]'
 
@@ -48,3 +51,13 @@ update-isolated-req:
 	pipenv --three
 	pipenv run pip install -r requirements/base.txt
 	pipenv run pip freeze > requirements/isolated.txt
+
+publish:
+	rm -r ./dist
+	python setup.py install
+	python setup.py sdist
+	twine upload dist/*
+docker:
+	docker build --no-cache -t ${IMG_LATEST} .
+docker-push:
+	docker tag ${IMG_LATEST} ${IMG} docker push owenyoung/sam-without-docker

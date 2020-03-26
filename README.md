@@ -6,6 +6,32 @@
 ![Apache-2.0](https://img.shields.io/npm/l/aws-sam-local.svg)
 ![SAM CLI Version](https://img.shields.io/github/release/awslabs/aws-sam-cli.svg?label=CLI%20Version)
 
+> I Modified from [aws-sam-cli](https://github.com/awslabs/aws-sam-cli), because aws-sam-cli only supports starting a container when starting the local api gateway, and my requirement is to use docker-compose to manage local development, so this project is modified to api gateway proxy The way to send a request changes from starting a docker container to sending an invoke request for a function, so that it can be managed separately with the docker lambda. Here are docker-compose.yaml example:
+
+```yaml
+version: '3'
+services:
+  lambda:
+    image: lambci/lambda:nodejs12.x
+    ports:
+      - "9001:9001"
+    volumes: 
+      - "./:/var/task:ro,delegated"
+    environment:
+        DOCKER_LAMBDA_WATCH: 1
+        DOCKER_LAMBDA_STAY_OPEN: 1
+    command: 
+      - hello-world/app.lambdaHandler
+  api:
+    image: owenyoung/sam-without-docker
+    ports:
+      - "3000:3000"
+    environment:
+      LAMBDA_ENDPOINT: "http://lambda:9001"
+```
+
+Then, visit: http://localhost:3000
+
 The AWS Serverless Application Model (SAM) is an open-source framework for building serverless applications. 
 It provides shorthand syntax to express functions, APIs, databases, and event source mappings. 
 With just a few lines of configuration, you can define the application you want and model it.

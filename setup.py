@@ -32,14 +32,14 @@ if os.getenv("SAM_CLI_DEV"):
     cmd_name = "samdev"
 
 setup(
-    name="aws-sam-cli",
+    name="aws-sam-cli-without-docker",
     version=read_version(),
     description="AWS SAM CLI is a CLI tool for local development and testing of Serverless applications",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="Amazon Web Services",
     author_email="aws-sam-developers@amazon.com",
-    url="https://github.com/awslabs/aws-sam-cli",
+    url="https://github.com/theowenyoung/aws-sam-cli",
     license="Apache License 2.0",
     packages=find_packages(exclude=["tests.*", "tests"]),
     keywords="AWS SAM CLI",

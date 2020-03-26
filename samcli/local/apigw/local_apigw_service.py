@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import base64
+import requests
 
 from flask import Flask, request
 from werkzeug.datastructures import Headers
@@ -71,7 +72,7 @@ class LocalApigwService(BaseLocalService):
     _DEFAULT_PORT = 3000
     _DEFAULT_HOST = "127.0.0.1"
 
-    def __init__(self, api, lambda_runner, static_dir=None, port=None, host=None, stderr=None):
+    def __init__(self, api, lambda_runner, static_dir=None, port=None, endpoint=None, host=None, stderr=None):
         """
         Creates an ApiGatewayService
 
@@ -98,6 +99,7 @@ class LocalApigwService(BaseLocalService):
         self.static_dir = static_dir
         self._dict_of_routes = {}
         self.stderr = stderr
+        self.endpoint = endpoint
 
     def create(self):
         """
@@ -193,28 +195,33 @@ class LocalApigwService(BaseLocalService):
         except UnicodeDecodeError:
             return ServiceErrorResponses.lambda_failure_response()
 
-        stdout_stream = io.BytesIO()
-        stdout_stream_writer = StreamWriter(stdout_stream, self.is_debugging)
+        # stdout_stream = io.BytesIO()
+        # stdout_stream_writer = StreamWriter(stdout_stream, self.is_debugging)
+
+        # try:
+        #     self.lambda_runner.invoke(route.function_name, event, stdout=stdout_stream_writer, stderr=self.stderr)
+        # except FunctionNotFound:
+        #     return ServiceErrorResponses.lambda_not_found_response()
+        r = None
+        lambda_endpoint = self.endpoint + "/2015-03-31/functions/" + route.function_name + "/invocations"
+        LOG.debug("lambda endpoint: %s", lambda_endpoint)
+        try:
+            r = requests.post(lambda_endpoint, event)
+        except Exception as e:
+            LOG.error(str(e))
+            return ServiceErrorResponses.lambda_failure_response()
+
+        # lambda_response, lambda_logs, _ = LambdaOutputParser.get_lambda_output(stdout_stream)
+
+        # if self.stderr and lambda_logs:
+        #     # Write the logs to stderr if available.
+        #     self.stderr.write(lambda_logs)
 
         try:
-            self.lambda_runner.invoke(route.function_name, event, stdout=stdout_stream_writer, stderr=self.stderr)
-        except FunctionNotFound:
-            return ServiceErrorResponses.lambda_not_found_response()
-
-        lambda_response, lambda_logs, _ = LambdaOutputParser.get_lambda_output(stdout_stream)
-
-        if self.stderr and lambda_logs:
-            # Write the logs to stderr if available.
-            self.stderr.write(lambda_logs)
-
-        try:
-            (status_code, headers, body) = self._parse_lambda_output(
-                lambda_response, self.api.binary_media_types, request
-            )
+            (status_code, headers, body) = self._parse_lambda_output(r.text, self.api.binary_media_types, request)
         except LambdaResponseParseException:
             LOG.error(str(LambdaResponseParseException))
             return ServiceErrorResponses.lambda_failure_response()
-
         return self.service_response(body, headers, status_code)
 
     def _get_current_route(self, flask_request):

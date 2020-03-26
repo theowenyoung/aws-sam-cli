@@ -4,6 +4,7 @@ CLI command for "local start-api" command
 
 import logging
 import click
+import os
 
 from samcli.cli.main import pass_context, common_options as cli_framework_options, aws_creds_options
 from samcli.commands.local.cli_common.options import invoke_common_options, service_common_options
@@ -40,6 +41,9 @@ and point SAM to the directory or file containing build artifacts.
     default="public",
     help="Any static assets (e.g. CSS/Javascript/HTML) files located in this directory " "will be presented at /",
 )
+@click.option(
+    "--endpoint", default=lambda: os.environ.get('LAMBDA_ENDPOINT', 'http://127.0.0.1:9001'), help="The lambda endpoint",
+)
 @invoke_common_options
 @cli_framework_options
 @aws_creds_options  # pylint: disable=R0914
@@ -51,6 +55,7 @@ def cli(
     host,
     port,
     static_dir,
+    endpoint,
     # Common Options for Lambda Invoke
     template_file,
     env_vars,
@@ -72,6 +77,7 @@ def cli(
         host,
         port,
         static_dir,
+        endpoint,
         template_file,
         env_vars,
         debug_port,
@@ -92,6 +98,7 @@ def do_cli(  # pylint: disable=R0914
     host,
     port,
     static_dir,
+    endpoint,
     template,
     env_vars,
     debug_port,
@@ -118,7 +125,7 @@ def do_cli(  # pylint: disable=R0914
     from samcli.commands.local.lib.exceptions import OverridesNotWellDefinedError
     from samcli.local.docker.lambda_debug_settings import DebuggingNotSupported
 
-    LOG.debug("local start-api command is called")
+    LOG.debug("local start-api command is called %s", endpoint)
 
     # Pass all inputs to setup necessary context to invoke function locally.
     # Handler exception raised by the processor for invalid args and print errors
@@ -142,7 +149,9 @@ def do_cli(  # pylint: disable=R0914
             aws_profile=ctx.profile,
         ) as invoke_context:
 
-            service = LocalApiService(lambda_invoke_context=invoke_context, port=port, host=host, static_dir=static_dir)
+            service = LocalApiService(
+                lambda_invoke_context=invoke_context, port=port, host=host, static_dir=static_dir, endpoint=endpoint
+            )
             service.start()
 
     except NoApisDefined as ex:
