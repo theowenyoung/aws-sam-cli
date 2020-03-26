@@ -60,4 +60,4 @@ publish:
 docker:
 	docker build --no-cache -t ${IMG_LATEST} .
 docker-push:
-	docker tag ${IMG_LATEST} ${IMG} docker push owenyoung/sam-without-docker
+	docker tag ${IMG_LATEST} ${IMG} && docker push owenyoung/aws-lambda-api-gateway-local

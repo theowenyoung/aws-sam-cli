@@ -23,7 +23,7 @@ services:
     command: 
       - hello-world/app.lambdaHandler
   api:
-    image: owenyoung/sam-without-docker
+    image: owenyoung/aws-lambda-api-gateway-local
     ports:
       - "3000:3000"
     environment:
