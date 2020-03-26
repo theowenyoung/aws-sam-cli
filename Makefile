@@ -4,7 +4,7 @@ SAM_CLI_TELEMETRY ?= 0
 REPO := owenyoung/sam-without-docker
 TAG := $$(git log -1 --pretty=%H)
 IMG    := ${REPO}:${TAG}
-IMG_LATEST := ${SERVER_NAME}:latest
+IMG_LATEST := ${REPO}:latest
 init:
 	SAM_CLI_DEV=1 pip install -e '.[dev]'
 
