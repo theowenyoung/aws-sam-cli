@@ -1,7 +1,7 @@
 # Default value for environment variable. Can be overridden by setting the
 # environment variable.
 SAM_CLI_TELEMETRY ?= 0
-REPO := owenyoung/sam-without-docker
+REPO := owenyoung/aws-lambda-api-gateway-local
 TAG := $$(git log -1 --pretty=%H)
 IMG    := ${REPO}:${TAG}
 IMG_LATEST := ${REPO}:latest
@@ -60,4 +60,4 @@ publish:
 docker:
 	docker build --no-cache -t ${IMG_LATEST} .
 docker-push:
-	docker tag ${IMG_LATEST} ${IMG} && docker push owenyoung/aws-lambda-api-gateway-local
+	docker tag ${IMG_LATEST} ${IMG} && docker push ${IMG_LATEST} && docker push ${IMG}
